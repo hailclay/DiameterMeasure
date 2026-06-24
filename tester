@@ -1,0 +1,14 @@
+import imagej
+
+ij = imagej.init('sc.fiji:fiji', mode = 'headless')
+
+macro = open("/Users/haile/Desktop/HoughCircle2.ijm").read()
+ij.script().run("macro.ijm",macro,True)
+
+import os
+if os.path.exists("/tmp/hough_test_results.csv"):
+    print("SUCCESS - results file written")
+    with open("/tmp/hough_test_results.csv") as f:
+        print(f.read()[:500])
+else:
+    print("FAIL - no results file written")
