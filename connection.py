@@ -19,14 +19,6 @@ def analyze_image(image_path,  pixel_ratio, unit, num_droplets = 200, threshold 
         subprocess.run(['open','/tmp/visual_output.png'])
     else:
         print("NOOOOOO")
-    '''
-    import os
-    print("feret file exists:", os.path.exists('/tmp/feret_values.txt'))
-    print("feret file size:", os.path.getsize('/tmp/feret_values.txt') if os.path.exists('/tmp/feret_values.txt') else "N/A")
-    print("results csv exists:", os.path.exists('/tmp/results.csv'))
-    print('what I got:')
-    print_thing = result.get('printed_args')
-    print(print_thing)'''
     feret_path = '/tmp/feret_values.txt'
     with open(feret_path) as f:
         values = [float(line.strip()) for line in f if line.strip()]
@@ -53,11 +45,27 @@ def analyze_image(image_path,  pixel_ratio, unit, num_droplets = 200, threshold 
 
     }
 
+numDroplets = int(input("What is a rough estimate of the num of droplets?"))
+measurePixel= float(input("For ratio, num of pixels"))
+if measurePixel == 0:
+    print("number of pixels cannot be 0 in measurement. Input again")
+    while(not measurePixel):
+        measurePixel= float(input("For ratio, num of pixels"))
 
+measureUnits = float(input("for ratio, for that num of pixels, what is the measurement in ur unit?"))
+unit = input("What is your unit?")
+path = input("What is the path of your image")[1:-1]
  
 print("processing image...")
-analyze_image('/Volumes/DISK_IMG/Droplet Picture/IMG_0007.jpg', 0.2, "what",500) #this works great!
+#analyze_image('/Volumes/DISK_IMG/Droplet Picture/IMG_0010.jpg', 0.1, "ooh",500) #this works great!
 #analyze_image('/Volumes/DISK_IMG/Droplet Picture/IMG_0008.jpg', 1, "hello",100) #this is having more trouble...
+try:
+    analyze_image(path,float(measureUnits/measurePixel),unit, numDroplets)
+except FileNotFoundError:
+    print("couldn't find the given file. Please try again:")
+    path = input("What is the path of your image")
+    analyze_image(path,float(measureUnits/measurePixel),unit, numDroplets)
+
 
 print("done :)")
 
