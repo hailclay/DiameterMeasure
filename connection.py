@@ -2,6 +2,7 @@ import imagej, skimage, os, xarray
 import matplotlib.pyplot as plt
 import csv
 import numpy as np
+import subprocess
 
 
 # Initialize ImageJ in head mode
@@ -13,6 +14,11 @@ def analyze_image(image_path,  pixel_ratio, unit, num_droplets = 200, threshold 
     print(f"what it should be: {macro_args}")
     macro = open('/Users/haile/Desktop/DmterMeasure.ijm').read()
     result = ij.py.run_macro(macro,{"argument": macro_args})
+    if os.path.exists('/tmp/visual_output.png'):
+        print("visual output saved successfully")
+        subprocess.run(['open','/tmp/visual_output.png'])
+    else:
+        print("NOOOOOO")
     '''
     import os
     print("feret file exists:", os.path.exists('/tmp/feret_values.txt'))
@@ -32,7 +38,10 @@ def analyze_image(image_path,  pixel_ratio, unit, num_droplets = 200, threshold 
     ax.set_title(f"Droplets Size Distribution(n={len(values)})")
     plt.tight_layout()
     plt.savefig("/tmp/histogram.png",dpi = 150)
+
+    subprocess.run(['open','/tmp/histogram.png'])
     plt.close()
+
 
     return{
         "histogram": "/tmp/histogram.png",
@@ -47,7 +56,9 @@ def analyze_image(image_path,  pixel_ratio, unit, num_droplets = 200, threshold 
 
  
 print("processing image...")
-analyze_image('/Volumes/DISK_IMG/Droplet Picture/IMG_0003.jpg', 1, "mm",100)
+analyze_image('/Volumes/DISK_IMG/Droplet Picture/IMG_0007.jpg', 0.2, "what",500) #this works great!
+#analyze_image('/Volumes/DISK_IMG/Droplet Picture/IMG_0008.jpg', 1, "hello",100) #this is having more trouble...
+
 print("done :)")
 
 ij.dispose()
