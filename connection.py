@@ -4,6 +4,8 @@ import csv
 import numpy as np
 import subprocess
 
+
+
 SIGMA_BLUR = 2
 CONFIDENCE_THRESHOLD = 0.15
 MIN_RADIUS = 80
@@ -36,9 +38,9 @@ def hough_detect(image_path, min_r = MIN_RADIUS, max_r = MAX_RADIUS):
     #plt.show()
     
     feret_values = (2*radii_found).tolist()
-    plot_values(feret_values,'pixels')
+    return feret_values
 
-def plot_values(feret: list[float],unit):
+def plot_values(feret: list[float],unit='pixels'):
     fig, ax, = plt.subplots()
     ax.hist(feret, bins = 'auto', edgecolor = 'black')
     ax.set_xlabel(f"Feret Diameter {unit}")
@@ -64,24 +66,12 @@ def segment_droplets(image_path,  pixel_ratio, unit, num_droplets = 200, thresho
     feret_path = '/tmp/feret_values.txt'
     with open(feret_path) as f:
         values = [float(line.strip()) for line in f if line.strip()]
-    
-    plot_values(values,unit)
+    return values
 
-
-    return{
-        "histogram": "/tmp/histogram.png",
-        "visual" : "tmp/visual_output.png",
-        "values": values,
-        "n" : len(values),
-        "mean": np.mean(values),
-        "std": np.std(values)
-
-    }
-
-hough_detect('/Volumes/DISK_IMG/Droplet Picture/IMG_0013.jpg')#works pretty well!
-#hough_detect('/Volumes/DISK_IMG/Droplet Picture/IMG_0010.jpg',40,110)#this works ok, but tends to undershoot and it really 
-#depends on the values you put in for blur and confidence
-#segment_droplets('/Volumes/DISK_IMG/Droplet Picture/IMG_0010.jpg', 1, "pixels",500) #this works great!
+def ratiod(values: list[float], ratio = 1.0):
+    for value in values:
+        value *= ratio
+    return values
 '''
 numDroplets = int(input("What is a rough estimate of the num of droplets?"))
 measurePixel= float(input("For ratio, num of pixels"))
@@ -95,8 +85,6 @@ unit = input("What is your unit?")
 path = input("What is the path of your image")[1:-1]
  
 print("processing image...")
-#analyze_image('/Volumes/DISK_IMG/Droplet Picture/IMG_0010.jpg', 0.1, "ooh",500) #this works great!
-#analyze_image('/Volumes/DISK_IMG/Droplet Picture/IMG_0008.jpg', 1, "hello",100) #this is having more trouble...
 try:
     segment_droplets(path,float(measureUnits/measurePixel),unit, numDroplets)
 except FileNotFoundError:
@@ -105,8 +93,17 @@ except FileNotFoundError:
     segment_droplets(path,float(measureUnits/measurePixel),unit, numDroplets)
 
 '''
-print("done :)")
 
-ij.dispose()
-import jpype
-jpype.shutdownJVM()
+if __name__== "__main__":
+    ratio = 10
+    unit = "urm"
+    values = hough_detect('/Volumes/DISK_IMG/Droplet Picture/IMG_0013.jpg')#works pretty well!
+    #hough_detect('/Volumes/DISK_IMG/Droplet Picture/IMG_0010.jpg',40,110)#this works ok, but tends to undershoot and it really 
+    #depends on the values you put in for blur and confidence
+    #segment_droplets('/Volumes/DISK_IMG/Droplet Picture/IMG_0010.jpg', 1, "pixels",500) #this works great!
+    adjusted = ratiod(values,ratio)
+    plot_values(adjusted,unit)
+    print("done :)")
+    ij.dispose()
+    import jpype
+    jpype.shutdownJVM()
