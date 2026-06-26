@@ -1,12 +1,22 @@
 import imagej,skimage, os
 import matplotlib.pyplot as plt
 import numpy as np
-import subprocess
+
 
 SIGMA_BLUR = 2
 CONFIDENCE_THRESHOLD = 0.15
 MIN_RADIUS = 80
 MAX_RADIUS = 140
+
+def mean(ferets):
+    sum = 0
+    for feret in ferets:
+        sum += feret
+    return sum/len(feret)
+
+def median(ferets):
+    processed = sorted(ferets)
+    return processed[len(ferets)//2]
 
 
 def hough_detect(image_path, min_r = MIN_RADIUS, max_r = MAX_RADIUS,sigma = SIGMA_BLUR, confidence = CONFIDENCE_THRESHOLD):
@@ -33,7 +43,7 @@ def hough_detect(image_path, min_r = MIN_RADIUS, max_r = MAX_RADIUS,sigma = SIGM
     #plt.show()
     
     feret_values = (2*radii_found).tolist()
-    return (feret_values,'/tmp/visual_output.png')
+    return feret_values
 
 def plot_values(feret: list[float],unit='pixels'):
     fig, ax, = plt.subplots()
@@ -42,10 +52,10 @@ def plot_values(feret: list[float],unit='pixels'):
     ax.set_ylabel("Count")
     ax.set_title(f"Droplets Size Distribution(n={len(feret)})")
     plt.tight_layout()
-    plt.savefig("/tmp/histogram.png",dpi = 150)
+    return fig
+    #plt.savefig("/tmp/histogram.png",dpi = 150)
 
-    subprocess.run(['open','/tmp/histogram.png'])
-    plt.close()
+   #plt.close()
 
 #print(f"ImageJ version: {ij.getVersion()}")
 def segment_droplets(image_path,  pixel_ratio, unit, threshold = "Default"):
@@ -57,17 +67,16 @@ def segment_droplets(image_path,  pixel_ratio, unit, threshold = "Default"):
     result = ij.py.run_macro(macro,{"argument": macro_args})
     if os.path.exists('/tmp/visual_output.png'):
         print("visual output saved successfully")
-        #subprocess.run(['open','/tmp/visual_output.png'])
     else:
         print("NOOOOOO")
     feret_path = '/tmp/feret_values.txt'
     with open(feret_path) as f:
         values = [float(line.strip()) for line in f if line.strip()]
-    return (values,'/tmp/visual_output.png')
+    return values
 
 def ratiod(values: list[float], ratio = 1.0):
-    for value in values:
-        value *= ratio
+    for i in range(len(values)):
+        values[i] = values[i] * ratio
     return values
 
 
