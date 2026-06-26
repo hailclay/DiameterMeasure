@@ -1,31 +1,26 @@
 import imagej,skimage, os
 import matplotlib.pyplot as plt
-import csv
 import numpy as np
 import subprocess
-
-
 
 SIGMA_BLUR = 2
 CONFIDENCE_THRESHOLD = 0.15
 MIN_RADIUS = 80
 MAX_RADIUS = 140
 
-# Initialize ImageJ in head mode
-print("Initializing PyImageJ...")
-ij = imagej.init('/Applications/Fiji')
-def hough_detect(image_path, min_r = MIN_RADIUS, max_r = MAX_RADIUS):
+
+def hough_detect(image_path, min_r = MIN_RADIUS, max_r = MAX_RADIUS,sigma = SIGMA_BLUR, confidence = CONFIDENCE_THRESHOLD):
     img = skimage.io.imread(image_path)
     gray_img = skimage.color.rgb2gray(img)
 
-    edges = skimage.feature.canny(gray_img,sigma = SIGMA_BLUR)
+    edges = skimage.feature.canny(gray_img,sigma = sigma)
     radii = np.arange(min_r,max_r,2)
     hough_res = skimage.transform.hough_circle(edges,radii)
 
     accums,cx,cy,radii_found = skimage.transform.hough_circle_peaks(
         hough_res, radii,
         min_xdistance=min_r,
-        min_ydistance=min_r, threshold = CONFIDENCE_THRESHOLD
+        min_ydistance=min_r, threshold = confidence
     )
     img_copy = img.copy()
     for center_y, center_x, radius in zip(cy,cx, radii_found):
@@ -53,8 +48,10 @@ def plot_values(feret: list[float],unit='pixels'):
     plt.close()
 
 #print(f"ImageJ version: {ij.getVersion()}")
-def segment_droplets(image_path,  pixel_ratio, unit, num_droplets = 200, threshold = "Default"):
-    macro_args = f"{num_droplets},{threshold},{pixel_ratio},{unit},{image_path}"
+def segment_droplets(image_path,  pixel_ratio, unit, threshold = "Default"):
+    print("Initializing PyImageJ...")
+    ij = imagej.init('/Applications/Fiji')
+    macro_args = f"{threshold},{pixel_ratio},{unit},{image_path}"
     print(f"what it should be: {macro_args}")
     macro = open('/Users/haile/Desktop/DmterMeasure.ijm').read()
     result = ij.py.run_macro(macro,{"argument": macro_args})
@@ -72,31 +69,13 @@ def ratiod(values: list[float], ratio = 1.0):
     for value in values:
         value *= ratio
     return values
-'''
-numDroplets = int(input("What is a rough estimate of the num of droplets?"))
-measurePixel= float(input("For ratio, num of pixels"))
-if measurePixel == 0:
-    print("number of pixels cannot be 0 in measurement. Input again")
-    while(not measurePixel):
-        measurePixel= float(input("For ratio, num of pixels"))
 
-measureUnits = float(input("for ratio, for that num of pixels, what is the measurement in ur unit?"))
-unit = input("What is your unit?")
-path = input("What is the path of your image")[1:-1]
- 
-print("processing image...")
-try:
-    segment_droplets(path,float(measureUnits/measurePixel),unit, numDroplets)
-except FileNotFoundError:
-    print("couldn't find the given file. Please try again:")
-    path = input("What is the path of your image")
-    segment_droplets(path,float(measureUnits/measurePixel),unit, numDroplets)
-
-'''
 
 if __name__== "__main__":
+    # Initialize ImageJ in head mode
     ratio = 10
     unit = "urm"
+    '''
     values = hough_detect('/Volumes/DISK_IMG/Droplet Picture/IMG_0013.jpg')#works pretty well!
     #hough_detect('/Volumes/DISK_IMG/Droplet Picture/IMG_0010.jpg',40,110)#this works ok, but tends to undershoot and it really 
     #depends on the values you put in for blur and confidence
@@ -106,4 +85,4 @@ if __name__== "__main__":
     print("done :)")
     ij.dispose()
     import jpype
-    jpype.shutdownJVM()
+    jpype.shutdownJVM()'''
