@@ -2,6 +2,8 @@ import streamlit as st
 import tempfile, os
 from connection import segment_droplets, hough_detect,ratiod
 
+IMG_PATH_NAME = '/tmp/visual_output.png'
+
 st.title("Droplet Diameter Measure")
 
 file = st.file_uploader("Upload your image")
@@ -35,7 +37,9 @@ if file is not None:
         #run(choice)
     pressed = st.button("Measure Diameter")
     if(pressed):
-        st.write(str(run(choice, args)))
+        result=run(choice,args)
+        if(result):
+            st.image(IMG_PATH_NAME)
         
 
 

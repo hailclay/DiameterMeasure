@@ -33,7 +33,7 @@ def hough_detect(image_path, min_r = MIN_RADIUS, max_r = MAX_RADIUS,sigma = SIGM
     #plt.show()
     
     feret_values = (2*radii_found).tolist()
-    return feret_values
+    return (feret_values,'/tmp/visual_output.png')
 
 def plot_values(feret: list[float],unit='pixels'):
     fig, ax, = plt.subplots()
@@ -57,13 +57,13 @@ def segment_droplets(image_path,  pixel_ratio, unit, threshold = "Default"):
     result = ij.py.run_macro(macro,{"argument": macro_args})
     if os.path.exists('/tmp/visual_output.png'):
         print("visual output saved successfully")
-        subprocess.run(['open','/tmp/visual_output.png'])
+        #subprocess.run(['open','/tmp/visual_output.png'])
     else:
         print("NOOOOOO")
     feret_path = '/tmp/feret_values.txt'
     with open(feret_path) as f:
         values = [float(line.strip()) for line in f if line.strip()]
-    return values
+    return (values,'/tmp/visual_output.png')
 
 def ratiod(values: list[float], ratio = 1.0):
     for value in values:
